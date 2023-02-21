@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
 import http.server
-import socketserver
 import sys
 import time
 
 DEFAULT_PORT=8000
-
+resp_delay = 0 # seconds
 
 class ServerHandler(http.server.BaseHTTPRequestHandler):
     def _set_headers(self, content_length=0):
@@ -16,19 +15,26 @@ class ServerHandler(http.server.BaseHTTPRequestHandler):
         if content_length > 0:
             self.send_header('Content-Length', content_length)
         self.end_headers()
+
+    def _delay(self):
+        if resp_delay > 0:
+            time.sleep(resp_delay)
     
     def do_HEAD(self):
-        # print(f"HEAD {self.path}")
+        print(f"HEAD {self.path} delay={resp_delay}")
+        self._delay()
         self._set_headers()
 
     def do_GET(self):
-        # print(f"GET {self.path}")
+        print(f"GET {self.path} delay={resp_delay}")
+        self._delay()
         self._set_headers()
         with open(self.path.lstrip('/'), 'rb') as f:
             self.wfile.write(f.read())
 
     def do_POST(self):
-        # print(f"POST {self.path}")
+        print(f"POST {self.path} delay={resp_delay}")
+        self._delay()
         with open(self.path.lstrip('/'), 'rb') as f:
             data = f.read()
         self.close_connection = False
